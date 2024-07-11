@@ -11,3 +11,57 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Add the following styles to your main CSS file or as inline styles */
+
+/* .bg-white {
+  background-color: white;
+}
+
+.w-16 {
+  width: 4rem;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.py-4 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+} */
+
+/* .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+} */
+
+/* Add to your main CSS file or a specific CSS module */
+/* Add this to your main CSS file or a specific CSS module */
+/* .custom-right-shadow {
+  box-shadow: 5px 0 15px -5px rgba(0, 0, 0, 0.1); 
+}
+
+.space-y-4 > :not(:last-child) {
+  margin-bottom: 1rem;
+}
+
+.text-gray-400 {
+  color: #cbd5e0;
+}
+
+.hover\:text-blue-500:hover {
+  color: #4299e1;
+} */
