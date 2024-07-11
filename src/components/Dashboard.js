@@ -40,7 +40,7 @@ const Dashboard = () => {
 
     try {
       const response = await axios.get(
-        `http://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${query}&days=3`
+        `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${query}&days=3`
       );
       setWeatherData(response.data);
       setForecastData(response.data.forecast.forecastday);
