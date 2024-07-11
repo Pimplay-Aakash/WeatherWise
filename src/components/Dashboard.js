@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import TodaysWeatherCard from "./TodaysWeatherCard";
 import HighlightsCard from "./HighlightsCard";
@@ -7,7 +7,6 @@ import WeatherCard from "./WeatherCard";
 import LocationIcon from "../assets/imgs/placeholder.png";
 import LoginForm from "./LoginForm";
 import Logo from "../assets/imgs/logo.png";
-// import { HiChatBubbleLeftRight } from "react-icons/hi2";
 import { auth } from "../config/firebaseAuth";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { FaSignInAlt, FaSignOutAlt } from "react-icons/fa";
@@ -32,31 +31,7 @@ const Dashboard = () => {
   });
   const [notifications] = useState([]);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setIsAuthenticated(true);
-      } else {
-        setIsAuthenticated(false);
-      }
-    });
-
-    fetchCurrentLocationWeather();
-
-    return () => unsubscribe();
-  }, []);
-
-  const handleAuthClick = () => {
-    if (isAuthenticated) {
-      signOut(auth).catch((error) => {
-        console.error("Error signing out:", error);
-      });
-    } else {
-      setShowLoginForm(true);
-    }
-  };
-
-  const fetchWeatherData = async (query) => {
+  const fetchWeatherData = useCallback(async (query) => {
     const apiKey = "841f4f8a3d7d47baa6e91239240707";
     if (!query) {
       setError("Location is empty. Please provide a valid location.");
@@ -74,9 +49,9 @@ const Dashboard = () => {
       console.error("Error fetching weather data:", error);
       setError("Could not fetch weather data. Please try again.");
     }
-  };
+  }, []);
 
-  const fetchCurrentLocationWeather = () => {
+  const fetchCurrentLocationWeather = useCallback(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -91,9 +66,33 @@ const Dashboard = () => {
     } else {
       setError("Geolocation is not supported by your browser.");
     }
-  };
+  }, [fetchWeatherData]);
 
   console.log(showNotificationModal);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+      }
+    });
+
+    fetchCurrentLocationWeather();
+
+    return () => unsubscribe();
+  }, [fetchCurrentLocationWeather]);
+
+  const handleAuthClick = () => {
+    if (isAuthenticated) {
+      signOut(auth).catch((error) => {
+        console.error("Error signing out:", error);
+      });
+    } else {
+      setShowLoginForm(true);
+    }
+  };
 
   const handleLocationChange = (e) => {
     setLocation(e.target.value);
@@ -113,14 +112,7 @@ const Dashboard = () => {
           <LoginForm onClose={() => setShowLoginForm(false)} />
         </div>
       )}
-      {/* {showNotificationModal && (
-        <NotificationSettingsModal
-          weatherData={weatherData}
-          notificationPreferences={notificationPreferences}
-          setNotificationPreferences={setNotificationPreferences}
-          onClose={() => setShowNotificationModal(false)}
-        />
-      )} */}
+
       <div className="flex-1 min-h-screen bg-blue-50">
         <div className="flex justify-between items-center mb-8 px-24 py-3 bg-gradient-to-b from-teal-200 to-transparent">
           <div className="flex items-center gap-2">
@@ -135,10 +127,7 @@ const Dashboard = () => {
               <img className="w-6" src={LocationIcon} alt="location Icon" />
               <span className="font-medium">Current Location</span>
             </button>
-            <form
-              onSubmit={handleLocationSubmit}
-              className="flex justify-center"
-            >
+            <form onSubmit={handleLocationSubmit} className="flex justify-center">
               <input
                 type="text"
                 value={location}
@@ -150,16 +139,10 @@ const Dashboard = () => {
                 type="submit"
                 className="bg-blue-500 text-white px-4 py-2 rounded-r-md"
               >
-                Get Weather
+                Search
               </button>
             </form>
 
-             <NotificationSettingsModal
-          weatherData={weatherData}
-          notificationPreferences={notificationPreferences}
-          setNotificationPreferences={setNotificationPreferences}
-          onClose={() => setShowNotificationModal(false)}
-        />
             {isAuthenticated ? (
               <button
                 onClick={handleAuthClick}
@@ -181,6 +164,13 @@ const Dashboard = () => {
                 <FaSignInAlt size={22} className=" text-blue-950 " />
               </button>
             )}
+
+            <NotificationSettingsModal
+              weatherData={weatherData}
+              notificationPreferences={notificationPreferences}
+              setNotificationPreferences={setNotificationPreferences}
+              onClose={() => setShowNotificationModal(false)}
+            />
           </div>
         </div>
         <div className="container mx-auto p-4">
@@ -195,11 +185,7 @@ const Dashboard = () => {
                 <h2 className="text-xl font-bold mb-2">3-Day Forecast</h2>
                 <div className="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {forecastData.map((day, index) => (
-                    <WeatherCard
-                      key={index}
-                      weather={day.day}
-                      date={day.date}
-                    />
+                    <WeatherCard key={index} weather={day.day} date={day.date} />
                   ))}
                 </div>
               </div>
@@ -221,10 +207,7 @@ const Dashboard = () => {
                   title="Humidity"
                   value={`${weatherData.current.humidity}%`}
                 />
-                <HighlightsCard
-                  title="UV Index"
-                  value={weatherData.current.uv}
-                />
+                <HighlightsCard title="UV Index" value={weatherData.current.uv} />
                 <HighlightsCard
                   title="Visibility"
                   value={`${weatherData.current.vis_km} km`}
@@ -234,9 +217,7 @@ const Dashboard = () => {
           )}
           {forecastData.length > 0 && (
             <div className="mt-4">
-              <h2 className="text-xl font-bold">
-                Today's Temperature Predictions
-              </h2>
+              <h2 className="text-xl font-bold">Today's Temperature Predictions</h2>
               <TemperatureChart forecast={forecastData} />
             </div>
           )}

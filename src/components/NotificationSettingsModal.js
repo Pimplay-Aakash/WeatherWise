@@ -1,37 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { FaBell } from "react-icons/fa";
-
 
 const NotificationSettingsModal = ({ weatherData, notificationPreferences, setNotificationPreferences }) => {
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [notifications, setNotifications] = useState([]);
 
-  useEffect(() => {
-    if (weatherData) {
-      generateNotifications();
-    }
-  }, [weatherData, notificationPreferences]);
-
-  const handleNotificationChange = (group, type) => {
-    setNotificationPreferences((prev) => ({
-      ...prev,
-      [group]: {
-        ...prev[group],
-        [type]: !prev[group][type],
-      },
-    }));
-  };
-
-  const saveNotificationPreferences = () => {
-    // Save preferences to local storage or backend
-    setShowNotificationModal(false);
-  };
-
-  const cancelNotificationPreferences = () => {
-    setShowNotificationModal(false);
-  };
-
-  const generateNotifications = () => {
+  const generateNotifications = useCallback(() => {
     const newNotifications = [];
 
     if (notificationPreferences.eventPlanners.rain && weatherData.current.condition.text.includes("rain")) {
@@ -65,7 +39,33 @@ const NotificationSettingsModal = ({ weatherData, notificationPreferences, setNo
     }
 
     setNotifications(newNotifications);
+  }, [weatherData, notificationPreferences]);
+
+  useEffect(() => {
+    if (weatherData) {
+      generateNotifications();
+    }
+  }, [weatherData, generateNotifications]);
+
+  const handleNotificationChange = (group, type) => {
+    setNotificationPreferences((prev) => ({
+      ...prev,
+      [group]: {
+        ...prev[group],
+        [type]: !prev[group][type],
+      },
+    }));
   };
+
+  const saveNotificationPreferences = () => {
+    // Save preferences to local storage or backend
+    setShowNotificationModal(false);
+  };
+
+  const cancelNotificationPreferences = () => {
+    setShowNotificationModal(false);
+  };
+
 
   return (
     <div>
