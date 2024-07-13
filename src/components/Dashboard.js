@@ -32,7 +32,7 @@ const Dashboard = () => {
   const [notifications] = useState([]);
 
   const fetchWeatherData = useCallback(async (query) => {
-    const apiKey = "841f4f8a3d7d47baa6e91239240707";
+    const apiKey = "12c30df179dd4a2584f164943241307";
     if (!query) {
       setError("Location is empty. Please provide a valid location.");
       return;
@@ -43,6 +43,7 @@ const Dashboard = () => {
         `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${query}&days=3`
       );
       setWeatherData(response.data);
+      console.log("response.data",response.data);
       setForecastData(response.data.forecast.forecastday);
       setError(null);
     } catch (error) {
